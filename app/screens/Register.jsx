@@ -17,7 +17,7 @@ function Register() {
 
   return (
     <View style={styles.container}>
-      <Image style={styles.img} source={require('../../assets/images/logo.png')} />
+      {/* <Image style={styles.img} source={require('../../assets/images/logo.png')} /> */}
       <View style={styles.signup}>
         <Text style={styles.title}>Please Sign Up</Text>
       </View>

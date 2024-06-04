@@ -1,12 +1,14 @@
 import React from 'react';
 import { Text, View, StyleSheet } from 'react-native';
 import Register from './screens/Register.jsx';
-import Login from './screens/Login.jsx'
+import Login from './screens/Login.jsx';
+import Main from './screens/Main.jsx';
+import Home from './screens/Home.jsx'
 
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Login />
+      <Home/>
     </View>
   );
 }
