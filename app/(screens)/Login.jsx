@@ -1,25 +1,31 @@
+import { Link,useRouter } from "expo-router";
 import React, { useState } from "react";
-import { View, StyleSheet, Text, TextInput, Pressable,Image } from "react-native";
+import {
+  View,
+  StyleSheet,
+  Text,
+  TextInput,
+  Pressable,
+} from "react-native";
 import { CheckBox } from "react-native-elements";
-// import { TouchableHighlight } from "react-native-gesture-handler";
 
 function Login() {
   const [isChecked, setIsChecked] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const route = useRouter();
 
   const handleLogin = () => {
     console.log("Email:", email);
     console.log("Password:", password);
     console.log("Remember Me:", isChecked);
+    // Navigate to Home screen
+    // navigation.navigate('Home');
+    route.push("/Main");
   };
 
   return (
     <View style={styles.main}>
-      <Image
-        style={styles.img}
-        // source={require("../../assets/images/logo.png")}
-      />
       <View style={styles.container}>
         <Text style={styles.heading}>Login</Text>
         <View style={styles.inpcont}>
@@ -35,13 +41,13 @@ function Login() {
         <View style={styles.inpcont}>
           <Text style={styles.label}>Password</Text>
           <TextInput
-            style={styles.input}
-            placeholder="Enter password"
-            keyboardType="visible-password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={true}
-          />
+          style={styles.input}
+          onChangeText={setPassword}
+          value={password}
+          placeholder="Enter your Password"
+          keyboardType="default"
+          secureTextEntry
+        />
         </View>
         <CheckBox
           center
@@ -53,9 +59,18 @@ function Login() {
           checkedColor="#2196F3"
           uncheckedColor="#2196F3"
         />
-        <Pressable style={styles.button} onPress={handleLogin}>
-          <Text style={styles.btnText}>Login</Text>
-        </Pressable>
+        <Link href="/Home" asChild>
+          <Pressable style={styles.button} onPress={handleLogin}>
+            <Text style={styles.btnText}>Login</Text>
+          </Pressable>
+        </Link>
+        <View style={styles.container}>
+          <Link href="/Register" asChild>
+            <Pressable>
+              <Text style={styles.label}>If dont have na Account</Text>
+            </Pressable>
+          </Link>
+        </View>
         <View style={styles.fgtpsswd}>
           <Pressable>
             <Text style={styles.fgttxt}>Forget Password</Text>
@@ -116,8 +131,8 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     marginBottom: 8,
-    textTransform:'uppercase',
-    fontWeight:'bold',
+    textTransform: "uppercase",
+    fontWeight: "bold",
     color: "#841584",
   },
   input: {

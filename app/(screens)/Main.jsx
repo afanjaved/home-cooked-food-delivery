@@ -1,36 +1,38 @@
 import React from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Pressable } from "react-native";
 import { Image } from "expo-image";
 // import logo from "../../assets/images/logo.png";
+import { Link, useNavigation } from "expo-router";
 
 function Main() {
+  const navigation = useNavigation();
   return (
     <View style={styles.main}>
       <View style={styles.headingCont}>
         <Text style={styles.headingText}>how you wanna use Homocook</Text>
       </View>
-      <View style={styles.box1}>
-        <Image
-          style={styles.image}
-          source="https://picsum.photos/seed/696/3000/2000"
-          contentFit="cover"
-          transition={1000}
-        />
-        {/* <Image
-            style={styles.image}
-          source={require('../../assets/logo.png')}
-        /> */}
-        <Text style={styles.title}>Eat Food</Text>
-      </View>
-      <View style={styles.box2}>
-      <Image
-          style={styles.image}
-          source="https://picsum.photos/seed/696/3000/2000"
-          contentFit="cover"
-          transition={1000}
-        />
-        <Text style={styles.title}>Provide Food</Text>
-      </View>
+      <Link href='/Login' asChild>
+        <Pressable style={styles.box1}>
+            <Image
+              style={styles.image}
+              source="https://cdn.pixabay.com/photo/2014/10/19/20/59/hamburger-494706_1280.jpg"
+              contentFit="cover"
+              transition={1000}
+            />
+            <Text style={styles.title}>Provide Food</Text>
+        </Pressable>
+      </Link>
+      <Link href='/Login' asChild>
+        <Pressable style={styles.box2}>
+            <Image
+              style={styles.image}
+              source="https://cdn.pixabay.com/photo/2014/12/15/14/05/salad-569156_1280.jpg"
+              contentFit="cover"
+              transition={1000}
+            />
+            <Text style={styles.title}>Eat Food</Text>
+        </Pressable>
+      </Link>
     </View>
   );
 }
@@ -59,7 +61,7 @@ const styles = StyleSheet.create({
   headingText: {
     fontWeight: "bold",
     textTransform: "uppercase",
-    fontSize: 20,
+    fontSize: 18,
     color: "white",
   },
   box1: {
@@ -71,10 +73,12 @@ const styles = StyleSheet.create({
     backgroundColor: "lightblue",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 60,
+    marginBottom: 10,
+    borderRadius:10,
+    overflow:'hidden'
   },
   image: {
-    height: "80%",
+    height: "86%",
     width: "100%",
   },
   title: {
@@ -91,5 +95,7 @@ const styles = StyleSheet.create({
     backgroundColor: "lightgreen",
     alignItems: "center",
     justifyContent: "center",
+    borderRadius:10,
+    overflow:'hidden'
   },
 });
