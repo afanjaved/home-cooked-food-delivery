@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Text,
@@ -11,6 +10,7 @@ import {
   Alert
 } from "react-native";
 import axios from 'axios';
+import { useRouter } from "expo-router"; // Assuming this is how you import the router
 
 function Register() {
   const router = useRouter();
@@ -18,7 +18,7 @@ function Register() {
   const [password, setPassword] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState("eater");
+  const [role, setRole] = useState("provider");
   const [loading, setLoading] = useState(false);
 
   const handleNext = async () => {
@@ -33,8 +33,6 @@ function Register() {
       role,
     };
 
-    console.log("Sending user data:", userData);
-
     try {
       const response = await axios.post(url, userData, {
         headers: {
@@ -43,7 +41,7 @@ function Register() {
       });
       console.log("Response data:", response.data);
       setLoading(false);
-      router.navigate("/SignupOTP");
+      router.navigate("/ChefSignupOTP");
     } catch (error) {
       setLoading(false);
       if (error.response) {

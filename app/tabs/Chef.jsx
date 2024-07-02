@@ -1,78 +1,34 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Image, Linking } from 'react-native';
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Image, Linking, ActivityIndicator, Alert } from 'react-native';
 import Icon from "react-native-vector-icons/FontAwesome";
+import axios from 'axios';
 
 function Shef() {
-  const [data, setData] = useState([
-    {
-      name: "Ali",
-      age: "30",
-      desec: "Developer",
-      phone: "0308077787",
-      icon: "phone",
-      ratting: "star",
-    },
-    {
-      name: "Sara",
-      age: "25",
-      desec: "Designer",
-      phone: "0308077787",
-      icon: "phone",
-    },
-    {
-      name: "John",
-      age: "35",
-      desec: "Manager",
-      phone: "0308077787",
-      icon: "phone",
-    },
-    {
-      name: "Ali",
-      age: "30",
-      desec: "Developer",
-      phone: "0308077787",
-      icon: "phone",
-    },
-    {
-      name: "Sara",
-      age: "25",
-      desec: "Designer",
-      phone: "0308077787",
-      icon: "phone",
-    },
-    {
-      name: "John",
-      age: "35",
-      desec: "Manager",
-      phone: "0308077787",
-      icon: "phone",
-    },
-    {
-      name: "Ali",
-      age: "30",
-      desec: "Developer",
-      phone: "0308077787",
-      icon: "phone",
-    },
-    {
-      name: "Sara",
-      age: "25",
-      desec: "Designer",
-      phone: "0308077787",
-      icon: "phone",
-    },
-    {
-      name: "John",
-      age: "35",
-      desec: "Manager",
-      phone: "0308077787",
-      icon: "phone",
-    },
-  ]);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProviders = async () => {
+      try {
+        const response = await axios.get("https://fyp-0qf7.onrender.com/api/provider/getproviders");
+        setData(response.data);
+      } catch (error) {
+        Alert.alert("Error fetching providers", error.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProviders();
+  }, []);
 
   const handleCall = (phoneNumber) => {
     Linking.openURL(`tel:${phoneNumber}`);
   };
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#841584" style={{ flex: 1, justifyContent: "center" }} />;
+  }
 
   return (
     <View style={styles.screen}>
@@ -83,9 +39,7 @@ function Shef() {
               <View key={index} style={styles.main}>
                 <View style={styles.left}>
                   <Image
-                    source={{
-                      uri: "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png",
-                    }}
+                    source={{ uri: item.image || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png" }}
                     style={styles.image}
                   />
                   <View style={styles.leftdown}>
@@ -98,18 +52,13 @@ function Shef() {
                 </View>
                 <View style={styles.right}>
                   <View style={styles.up}>
-                    <Text style={styles.text}>{item.desec}</Text>
-                    <Text style={{ fontSize: 16, textTransform: "capitalize" }}>
-                      {item.age}
-                    </Text>
-                    <Text style={{ fontSize: 16, textTransform: "capitalize" }}>
-                      {item.name}
-                    </Text>
+                    <Text style={styles.text}>Chef</Text>
+                    <Text style={{ fontSize: 16, textTransform: "capitalize" }}>{item.name}</Text>
                   </View>
                   <TouchableOpacity onPress={() => handleCall(item.phone)}>
                     <View style={styles.down}>
                       <View style={styles.downleft}>
-                        <Icon name={item.icon} size={20} color="#000" />
+                        <Icon name="phone" size={20} color="#000" />
                       </View>
                       <View style={styles.downright}>
                         <Text>{item.phone}</Text>
@@ -142,7 +91,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     justifyContent: "center",
     alignContent: "center",
-    // backgroundColor: "green",
     width: "100%",
     padding: 6,
   },

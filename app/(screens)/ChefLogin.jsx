@@ -11,7 +11,7 @@ function Login() {
   const [isChecked, setIsChecked] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("eater"); // You can change this based on user selection
+  const [role, setRole] = useState("provider"); // You can change this based on user selection
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -25,7 +25,7 @@ function Login() {
 
       const { user, token } = response.data;
       login(user, token); // Update the auth state with user and token
-      router.push("../Home"); // Navigate to Home screen
+      router.push("./Cheforder"); // Navigate to Home screen
     } catch (error) {
       console.error("Login error", error);
       Alert.alert("Login failed", error.response?.data?.message || "Something went wrong");
@@ -77,14 +77,14 @@ function Login() {
           </Pressable>
         )}
         <View style={styles.container}>
-          <Link href="/Register" asChild>
+          <Link href="/ChefRegister" asChild>
             <Pressable>
               <Text style={styles.label}>If you don't have an Account</Text>
             </Pressable>
           </Link>
         </View>
         <View style={styles.fgtpsswd}>
-          <Link href="/Forget" asChild>
+          <Link href="/ChefForget" asChild>
             <Pressable>
               <Text style={styles.fgttxt}>Forget Password</Text>
             </Pressable>
@@ -183,3 +183,4 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
 });
+

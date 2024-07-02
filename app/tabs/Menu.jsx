@@ -1,85 +1,122 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  ScrollView,
-  SafeAreaView,
-} from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Pressable, Alert, ActivityIndicator } from "react-native";
+import axios from 'axios';
+import { useAuth } from '../useAuth'; // Adjust the path as per your project structure
 
 function Menu() {
-  const [data, setData] = useState([
-    {
-      name: "Pizza",
-      rating: 8,
-      price: 10,
-    },
-    {
-      name: "Burger",
-      rating: 7,
-      price: 8,
-    },
-    {
-      name: "Sushi",
-      rating: 9,
-      price: 15,
-    },
-    {
-      name: "Tacos",
-      rating: 8,
-      price: 12,
-    },
-    {
-      name: "Pasta",
-      rating: 7,
-      price: 11,
-    },
-    {
-      name: "Steak",
-      rating: 9,
-      price: 20,
-    },
-    {
-      name: "Salad",
-      rating: 6,
-      price: 7,
-    },
-    {
-      name: "Sandwich",
-      rating: 7,
-      price: 9,
-    },
-    {
-      name: "Ramen",
-      rating: 8,
-      price: 13,
-    },
-    {
-      name: "Fried Chicken",
-      rating: 8,
-      price: 10,
-    },
-  ]);
+  const { authState } = useAuth();
+  const { user } = authState;
+
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [orderLoading, setOrderLoading] = useState(false);
+  const [counters, setCounters] = useState([]);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("https://fyp-0qf7.onrender.com/api/food/getfood");
+      setData(response.data);
+      setCounters(Array(response.data.length).fill(0));
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const counterIncrement = (index) => {
+    const newCounters = [...counters];
+    newCounters[index] += 1;
+    setCounters(newCounters);
+  };
+
+  const counterDecrement = (index) => {
+    const newCounters = [...counters];
+    if (newCounters[index] > 0) {
+      newCounters[index] -= 1;
+    }
+    setCounters(newCounters);
+  };
+
+  const placeOrder = async (index) => {
+    const item = data[index];
+    // console.log(item);
+    const quantity = counters[index];
+    const providerId = item.userRef;    ; // Adjust if your item object has a different structure
+
+    if (quantity === 0) {
+      Alert.alert("Error", "Please select a quantity greater than 0.");
+      return;
+    }
+
+    setOrderLoading(true);
+    try {
+      const response = await axios.post("https://fyp-0qf7.onrender.com/api/order/createorder", {
+        email: user.email,
+        title: item.name,
+        price: item.price,
+        quantity: quantity,
+        providerId: providerId
+      });
+
+      Alert.alert("Order Placed", `You have placed an order for ${item.name} with quantity ${quantity}`, [{ text: "OK" }]);
+    } catch (error) {
+      Alert.alert("Error", "Failed to place order");
+    } finally {
+      setOrderLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" color="#841584" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.screen}>
       <SafeAreaView>
         <ScrollView>
-        <View style={styles.card}>
-          {data.map((item, index) => (
-            <View key={index} style={styles.main}>
-              <View style={styles.left}>
-                <Text style={styles.text}>{item.name}</Text>
-                <Text>Price: {item.price}</Text>
+          <View style={styles.card}>
+            {data.map((item, index) => (
+              <View
+                key={index}
+                style={styles.cardItem}
+              >
+                <View style={styles.main}>
+                  <View style={styles.left}>
+                    <Text style={styles.text}>{item.name}</Text>
+                    <Text>Price: {item.price}</Text>
+                  </View>
+                  <View style={styles.right}>
+                    <Text style={styles.text}>Rating</Text>
+                    <Text>{item.rating}/10</Text>
+                  </View>
+                </View>
+                <View style={styles.counterContainer}>
+                  <Pressable style={styles.Counterbutton} onPress={() => counterIncrement(index)}>
+                    <Text style={styles.btnText}>+</Text>
+                  </Pressable>
+                  <Text style={styles.btnText}>{counters[index]}</Text>
+                  <Pressable style={styles.Counterbutton} onPress={() => counterDecrement(index)}>
+                    <Text style={styles.btnText}>-</Text>
+                  </Pressable>
+                </View>
+                <Pressable style={styles.button} onPress={() => placeOrder(index)} disabled={orderLoading}>
+                  {orderLoading ? (
+                    <ActivityIndicator size="small" color="#FFF" />
+                  ) : (
+                    <Text style={styles.btnText}>Place Order</Text>
+                  )}
+                </Pressable>
               </View>
-              <View style={styles.right}>
-                <Text style={styles.text}>Rating</Text>
-                <Text>{item.rating}/10</Text>
-              </View>
-            </View>
-          ))}
+            ))}
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -95,36 +132,43 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 10,
   },
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  button: {
+    width: "100%",
+    backgroundColor: "#841584",
+    padding: 10,
+    alignItems: "center",
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  Counterbutton: {
+    width: "20%",
+    backgroundColor: "#841584",
+    padding: 10,
+    alignItems: "center",
+    borderRadius: 5,
+    marginVertical: 10,
+  },
+  btnText: {
+    fontSize: 20,
+    color: "white",
+  },
   card: {
     width: "100%",
+    gap: 10,
   },
-  up: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignContent: "center",
-    width: "100%",
+  cardItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: 'gray',
+    borderRadius: 20,
+    overflow: 'hidden',
     padding: 6,
-  },
-  text: {
-    fontSize: 18,
-    fontWeight: "bold",
-    textTransform: "capitalize",
-  },
-  down: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    textAlign: "center",
-    backgroundColor: "#841584",
-    padding: 4,
-    borderRadius: 10,
-  },
-  downleft: {
-    width: "20%",
-  },
-  downright: {
-    width: "80%",
+    marginBottom: 10,
   },
   main: {
     flexDirection: "row",
@@ -140,15 +184,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
   },
-  leftdown: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignContent: "center",
-    alignItems: "center",
-    alignSelf: "center",
-    gap: 4,
-  },
   right: {
     width: "60%",
     borderRadius: 10,
@@ -159,9 +194,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 2,
   },
-  image: {
-    width: "100%",
-    height: 110,
-    borderRadius: 10,
+  text: {
+    fontSize: 18,
+    fontWeight: "bold",
+    textTransform: "capitalize",
+  },
+  counterContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
   },
 });

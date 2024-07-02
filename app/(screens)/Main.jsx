@@ -11,7 +11,7 @@ function Main() {
       <View style={styles.headingCont}>
         <Text style={styles.headingText}>how you wanna use Homocook</Text>
       </View>
-      <Link href='/Login' asChild>
+      <Link href='/ChefLogin' asChild>
         <Pressable style={styles.box1}>
             <Image
               style={styles.image}

@@ -16,18 +16,18 @@ export default function AppTabs() {
           } else if (route.name === 'Menu') {
             iconName = focused ? 'bars' : 'navicon';
           }
-
+          
           return <Icon name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: 'tomato',
         tabBarInactiveTintColor: 'gray',
-        headerShown: true,
+        headerShown: false,
         headerTitle: route.name 
       })}
     >
-      <Tabs.Screen name="Order" />
-      <Tabs.Screen name="Products" />
       <Tabs.Screen name="Menu" />
+      <Tabs.Screen name="Chef" />
+      <Tabs.Screen name="Order" />
     </Tabs>
   );
 }

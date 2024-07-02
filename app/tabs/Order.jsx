@@ -1,103 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   ScrollView,
   SafeAreaView,
+  ActivityIndicator,
+  Alert
 } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
+import axios from 'axios';
+import { useAuth } from '../useAuth'; // Adjust the path as per your project structure
 
-function Oder() {
-  const foodItems = [
-    {
-      title: "Pizza",
-      price: "8.99 $",
-      quantity: 2,
-      totalAmount: (8.99 * 2).toFixed(2),
-    },
-    {
-      title: "Burger",
-      price: "5.49 $",
-      quantity: 3,
-      totalAmount: (5.49 * 3).toFixed(2),
-    },
-    {
-      title: "Pasta",
-      price: "7.99 $",
-      quantity: 1,
-      totalAmount: (7.99 * 1).toFixed(2),
-    },
-    {
-      title: "Salad",
-      price: "4.99 $",
-      quantity: 4,
-      totalAmount: (4.99 * 4).toFixed(2),
-    },
-    {
-      title: "Sushi",
-      price: "12.49 $",
-      quantity: 2,
-      totalAmount: (12.49 * 2).toFixed(2),
-    },
-    {
-      title: "Taco",
-      price: "3.99 $",
-      quantity: 5,
-      totalAmount: (3.99 * 5).toFixed(2),
-    },
-    {
-      title: "Sandwich",
-      price: "6.49 $",
-      quantity: 2,
-      totalAmount: (6.49 * 2).toFixed(2),
-    },
-    {
-      title: "Steak",
-      price: "15.99 $",
-      quantity: 1,
-      totalAmount: (15.99 * 1).toFixed(2),
-    },
-    {
-      title: "Soup",
-      price: "4.49 $",
-      quantity: 3,
-      totalAmount: (4.49 * 3).toFixed(2),
-    },
-    {
-      title: "Ice Cream",
-      price: "3.49 $",
-      quantity: 4,
-      totalAmount: (3.49 * 4).toFixed(2),
-    },
-  ];
+function Order() {
+  const { authState } = useAuth();
+  const { user } = authState;
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await axios.post("https://fyp-0qf7.onrender.com/api/order/geteaterorder", { email: user.email });
+        setOrders(response.data);
+      } catch (error) {
+        Alert.alert("Error fetching orders", error.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [user.email]);
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#841584" style={{ flex: 1, justifyContent: "center" }} />;
+  }
 
   return (
     <View style={styles.screen}>
       <SafeAreaView>
         <ScrollView>
           <View style={styles.card}>
-            {foodItems.map((item, index) => (
+            {orders.map((order, index) => (
               <View key={index} style={styles.main}>
                 <View style={styles.left}>
-                  <Text style={styles.text}>{item.title}</Text>
+                  <Text style={styles.text}>{order.title}</Text>
                   <View style={styles.leftdown}>
                     <Text style={styles.text}>Price :</Text>
-                    <Text>{item.price}</Text>
+                    <Text>{order.price} $</Text>
                   </View>
                 </View>
                 <View style={styles.right}>
                   <View style={styles.up}>
                     <View style={styles.leftdown}>
                       <Text style={styles.text}>Quantity :</Text>
-                      <Text style={styles.text}>{item.quantity}</Text>
+                      <Text style={styles.text}>{order.quantity}</Text>
                     </View>
                     <View style={styles.leftdown}>
                       <Text style={styles.text}>Total Price :</Text>
                       <Text style={{ fontSize: 16, textTransform: "capitalize" }}>
-                      {item.totalAmount}
-                    </Text>
+                        {(order.price * order.quantity).toFixed(2)} $
+                      </Text>
                     </View>
                   </View>
                 </View>
@@ -110,7 +73,7 @@ function Oder() {
   );
 }
 
-export default Oder;
+export default Order;
 
 const styles = StyleSheet.create({
   screen: {

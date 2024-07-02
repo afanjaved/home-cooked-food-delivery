@@ -1,8 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import Home from './Home';
 import Main from './(screens)/Main'
-import  Chefs from './Cards/chefs'
 
 export default function Index() {
   return (
