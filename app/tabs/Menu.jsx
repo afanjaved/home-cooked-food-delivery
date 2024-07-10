@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, Pressable, Alert, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, Pressable, Alert, ActivityIndicator, Modal, TouchableOpacity } from "react-native";
 import axios from 'axios';
 import { useAuth } from '../useAuth'; // Adjust the path as per your project structure
 
@@ -11,6 +11,9 @@ function Menu() {
   const [loading, setLoading] = useState(true);
   const [orderLoading, setOrderLoading] = useState(false);
   const [counters, setCounters] = useState([]);
+  const [ratingModalVisible, setRatingModalVisible] = useState(false);
+  const [selectedFoodIndex, setSelectedFoodIndex] = useState(null);
+  const [rating, setRating] = useState(0);
 
   useEffect(() => {
     fetchData();
@@ -44,9 +47,8 @@ function Menu() {
 
   const placeOrder = async (index) => {
     const item = data[index];
-    // console.log(item);
     const quantity = counters[index];
-    const providerId = item.userRef;    ; // Adjust if your item object has a different structure
+    const providerId = item.userRef; // Adjust if your item object has a different structure
 
     if (quantity === 0) {
       Alert.alert("Error", "Please select a quantity greater than 0.");
@@ -71,6 +73,34 @@ function Menu() {
     }
   };
 
+  const openRatingModal = (index) => {
+    setSelectedFoodIndex(index);
+    setRatingModalVisible(true);
+  };
+
+  const submitRating = async () => {
+    if (rating < 1 || rating > 5) {
+      Alert.alert("Error", "Please select a rating between 1 and 5.");
+      return;
+    }
+
+    const item = data[selectedFoodIndex];
+
+    try {
+      const response = await axios.post("https://fyp-0qf7.onrender.com/api/food/ratefood", {
+        foodId: item._id,
+        rate: rating,
+      });
+
+      Alert.alert("Rating Submitted", `You have rated ${item.name} with ${rating} stars`, [{ text: "OK" }]);
+      fetchData(); // Refresh data to show updated rating
+    } catch (error) {
+      Alert.alert("Error", "Failed to submit rating");
+    } finally {
+      setRatingModalVisible(false);
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loader}>
@@ -85,10 +115,7 @@ function Menu() {
         <ScrollView>
           <View style={styles.card}>
             {data.map((item, index) => (
-              <View
-                key={index}
-                style={styles.cardItem}
-              >
+              <View key={index} style={styles.cardItem}>
                 <View style={styles.main}>
                   <View style={styles.left}>
                     <Text style={styles.text}>{item.name}</Text>
@@ -96,7 +123,7 @@ function Menu() {
                   </View>
                   <View style={styles.right}>
                     <Text style={styles.text}>Rating</Text>
-                    <Text>{item.rating}/10</Text>
+                    <Text>{item.averageRating.toFixed(1)}/5</Text>
                   </View>
                 </View>
                 <View style={styles.counterContainer}>
@@ -115,11 +142,33 @@ function Menu() {
                     <Text style={styles.btnText}>Place Order</Text>
                   )}
                 </Pressable>
+                <Pressable style={styles.button} onPress={() => openRatingModal(index)}>
+                  <Text style={styles.btnText}>Rate</Text>
+                </Pressable>
               </View>
             ))}
           </View>
         </ScrollView>
       </SafeAreaView>
+
+      <Modal visible={ratingModalVisible} transparent={true} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>Rate the food</Text>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <TouchableOpacity key={star} onPress={() => setRating(star)}>
+                <Text style={styles.star}>{rating >= star ? '★' : '☆'}</Text>
+              </TouchableOpacity>
+            ))}
+            <Pressable style={styles.button} onPress={submitRating}>
+              <Text style={styles.btnText}>Submit Rating</Text>
+            </Pressable>
+            <Pressable style={styles.button} onPress={() => setRatingModalVisible(false)}>
+              <Text style={styles.btnText}>Cancel</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -204,5 +253,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  star: {
+    fontSize: 30,
+    marginHorizontal: 5,
   },
 });

@@ -32,6 +32,11 @@ function Order() {
     fetchOrders();
   }, [user.email]);
 
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
   if (loading) {
     return <ActivityIndicator size="large" color="#841584" style={{ flex: 1, justifyContent: "center" }} />;
   }
@@ -48,6 +53,13 @@ function Order() {
                   <View style={styles.leftdown}>
                     <Text style={styles.text}>Price :</Text>
                     <Text>{order.price} $</Text>
+                  </View>
+                  <View style={styles.leftdown}>
+                    <Text style={styles.text}>{order.status}</Text>
+                  </View>
+                  <View style={styles.leftdown}>
+                    <Text style={styles.text}>Date :</Text>
+                    <Text>{formatDate(order.createdAt)}</Text>
                   </View>
                 </View>
                 <View style={styles.right}>

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Image, Linking, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView, Image, Linking, ActivityIndicator, Alert, Modal, TextInput, Button } from 'react-native';
 import Icon from "react-native-vector-icons/FontAwesome";
 import axios from 'axios';
 
 function Shef() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState(null);
+  const [rating, setRating] = useState('');
 
   useEffect(() => {
     const fetchProviders = async () => {
@@ -26,6 +29,55 @@ function Shef() {
     Linking.openURL(`tel:${phoneNumber}`);
   };
 
+  const renderStars = (rating) => {
+    if (rating == null || typeof rating !== 'number' || rating < 0 || rating > 5) {
+      rating = 0; // Default to 0 stars if rating is invalid
+    }
+
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 !== 0;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+    return (
+      <View style={styles.stars}>
+        {[...Array(fullStars)].map((_, index) => (
+          <Icon key={`full-${index}`} name="star" size={20} color="#FFD700" />
+        ))}
+        {halfStar && <Icon key="half" name="star-half-o" size={20} color="#FFD700" />}
+        {[...Array(emptyStars)].map((_, index) => (
+          <Icon key={`empty-${index}`} name="star-o" size={20} color="#FFD700" />
+        ))}
+      </View>
+    );
+  };
+
+  const handleRate = (provider) => {
+    setSelectedProvider(provider);
+    setModalVisible(true);
+  };
+
+  const submitRating = async () => {
+    if (rating < 1 || rating > 5 || !Number.isInteger(Number(rating))) {
+      Alert.alert("Invalid rating", "Rating must be a whole number between 1 and 5");
+      return;
+    }
+
+    try {
+      await axios.post("https://fyp-0qf7.onrender.com/api/provider/rate", {
+        email: selectedProvider.email,
+        rate: Number(rating),
+      });
+      Alert.alert("Success", "Rating submitted successfully");
+      setModalVisible(false);
+      setRating('');
+      // Optionally, refresh the data to show updated ratings
+      const response = await axios.get("https://fyp-0qf7.onrender.com/api/provider/getproviders");
+      setData(response.data);
+    } catch (error) {
+      Alert.alert("Error", error.message || "Something went wrong");
+    }
+  };
+
   if (loading) {
     return <ActivityIndicator size="large" color="#841584" style={{ flex: 1, justifyContent: "center" }} />;
   }
@@ -42,13 +94,7 @@ function Shef() {
                     source={{ uri: item.image || "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png" }}
                     style={styles.image}
                   />
-                  <View style={styles.leftdown}>
-                    <Icon name="star" size={20} color="#FFD700" />
-                    <Icon name="star" size={20} color="#FFD700" />
-                    <Icon name="star" size={20} color="#FFD700" />
-                    <Icon name="star-o" size={20} color="#FFD700" />
-                    <Icon name="star-o" size={20} color="#FFD700" />
-                  </View>
+                  {renderStars(item.averageRating)}
                 </View>
                 <View style={styles.right}>
                   <View style={styles.up}>
@@ -65,12 +111,39 @@ function Shef() {
                       </View>
                     </View>
                   </TouchableOpacity>
+                  <TouchableOpacity onPress={() => handleRate(item)} style={styles.rateButton}>
+                    <Text style={styles.rateText}>Rate</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             ))}
           </View>
         </ScrollView>
       </SafeAreaView>
+
+      {selectedProvider && (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalTitle}>Rate {selectedProvider.name}</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter rating (1-5)"
+                keyboardType="numeric"
+                value={rating}
+                onChangeText={setRating}
+              />
+              <Button title="Submit" onPress={submitRating} />
+              <Button title="Cancel" color="red" onPress={() => setModalVisible(false)} />
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -128,10 +201,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
   },
-  leftdown: {
-    display: "flex",
-    flexDirection: "row",
-  },
   right: {
     width: "60%",
     borderRadius: 10,
@@ -146,5 +215,53 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 100,
+  },
+  stars: {
+    flexDirection: "row",
+    marginTop: 4,
+  },
+  rateButton: {
+    marginTop: 10,
+    padding: 10,
+    backgroundColor: "#841584",
+    borderRadius: 10,
+  },
+  rateText: {
+    color: "#FFF",
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalView: {
+    width: 300,
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    marginBottom: 20,
+  },
+  input: {
+    width: "100%",
+    padding: 10,
+    borderColor: "#841584",
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 20,
   },
 });
