@@ -40,7 +40,6 @@ function CreateFood() {
         avlabilityTime: availabilityTime,
         email: user.email,
         phone: "123-456-7890", // Default phone number
-        rating: rating || 3.6
       });
       Alert.alert("Success", "Food item created successfully");
       // Clear form
@@ -82,14 +81,6 @@ function CreateFood() {
             value={availabilityTime}
             onChangeText={setAvailabilityTime}
             placeholder="Enter availability time"
-          />
-          <Text style={styles.label}>Rating</Text>
-          <TextInput
-            style={styles.input}
-            value={rating}
-            onChangeText={setRating}
-            placeholder="Enter rating (default 3.6)"
-            keyboardType="numeric"
           />
           <TouchableHighlight style={styles.button} onPress={handleSubmit} disabled={loading}>
             {loading ? (

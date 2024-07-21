@@ -8,23 +8,21 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Alert,
-  TouchableOpacity // Import TouchableOpacity for button styling
+  TouchableOpacity
 } from "react-native";
 import axios from 'axios';
 import { useAuth } from '../useAuth'; // Adjust the path as per your project structure
-import { useNavigation } from '@react-navigation/native'; // Import useNavigation
 
-function Order() {
+function ChefOrderHistory() {
   const { authState } = useAuth();
   const { user } = authState;
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigation = useNavigation(); // Initialize navigation
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.post("https://fyp-0qf7.onrender.com/api/order/geteaterorder", { email: user.email });
+        const response = await axios.post("https://fyp-0qf7.onrender.com/api/order/getproviderorderHistory", { email: user.email });
         setOrders(response.data);
       } catch (error) {
         Alert.alert("Error fetching orders", error.message || "Something went wrong");
@@ -49,13 +47,13 @@ function Order() {
     <View style={styles.screen}>
       <SafeAreaView>
         <ScrollView>
-        <Link href='/EaterSummary' asChild>
-        <TouchableOpacity
-        style={styles.button} // Apply custom styles to the button
-      >
-        <Text style={styles.buttonText}>Order Summary</Text>
-      </TouchableOpacity>
-      </Link>
+          <Link href='/Chefsummary' asChild>
+            <TouchableOpacity
+              style={styles.button}
+            >
+              <Text style={styles.buttonText}>Order Summary</Text>
+            </TouchableOpacity>
+          </Link>
           <View style={styles.card}>
             {orders.map((order, index) => (
               <View key={index} style={styles.main}>
@@ -96,7 +94,7 @@ function Order() {
   );
 }
 
-export default Order;
+export default ChefOrderHistory;
 
 const styles = StyleSheet.create({
   screen: {

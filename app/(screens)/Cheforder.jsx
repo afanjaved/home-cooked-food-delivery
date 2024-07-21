@@ -81,6 +81,11 @@ function Chefoder() {
             <Text style={styles.btnText}>Add food item</Text>
           </TouchableHighlight>
         </Link>
+        <Link href="/ChefOrderHistory" asChild>
+          <TouchableHighlight style={styles.button}>
+            <Text style={styles.btnText}>Order History</Text>
+          </TouchableHighlight>
+        </Link>
         <ScrollView>
           <View style={styles.card}>
             {foodItems.map((item, index) => (
